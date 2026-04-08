@@ -45,7 +45,7 @@ jobs:
 
               # Use Python for URL-encoding and all date arithmetic to keep the
               # logic consistent and avoid platform-specific shell quirks.
-              RESULT=$(python3 .github/scripts/check_file_updates.py)
+              RESULT=$(FILE_PATH="$FILE_PATH" BRANCH="$BRANCH" WORKSPACE="$WORKSPACE" REPO_SLUG="$REPO_SLUG" python3 .github/scripts/check_file_updates.py)
 
               COMMIT_DATE=$(echo "$RESULT" | head -n 1)
               STATUS=$(echo "$RESULT" | tail -n 1)
