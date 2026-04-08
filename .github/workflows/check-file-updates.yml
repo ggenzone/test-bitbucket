@@ -11,69 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: mikefarah/yq@v4
-
       - name: Checkout this repository to read settings.yml
         uses: actions/checkout@v4
 
       - name: Check each Bitbucket repository for recent file updates
         env:
           BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          REPO_COUNT=$(yq '.repositories | length' settings.yml)
-
-          for i in $(seq 0 $((REPO_COUNT - 1))); do
-            REPO_NAME=$(yq ".repositories[$i].name" settings.yml)
-            BRANCH=$(yq ".repositories[$i].branch" settings.yml)
-            FILE_COUNT=$(yq ".repositories[$i].files | length" settings.yml)
-
-            echo "──────────────────────────────────────────"
-            echo "Repository : $REPO_NAME"
-            echo "Branch     : $BRANCH"
-
-            WORKSPACE=$(echo "$REPO_NAME" | cut -d'/' -f1)
-            REPO_SLUG=$(echo "$REPO_NAME" | cut -d'/' -f2)
-
-            UPDATED=false
-
-            for j in $(seq 0 $((FILE_COUNT - 1))); do
-              FILE_PATH=$(yq ".repositories[$i].files[$j]" settings.yml)
-
-              echo "  Checking file: $FILE_PATH"
-
-              # Use Python for URL-encoding and all date arithmetic to keep the
-              # logic consistent and avoid platform-specific shell quirks.
-              RESULT=$(python3 .github/scripts/check_file_updates.py)
-
-              COMMIT_DATE=$(echo "$RESULT" | head -n 1)
-              STATUS=$(echo "$RESULT" | tail -n 1)
-
-              case "$COMMIT_DATE" in
-                NO_COMMITS)
-                  echo "    No commits found for $FILE_PATH on branch $BRANCH"
-                  continue
-                  ;;
-                NO_DATE)
-                  echo "    Could not determine commit date for $FILE_PATH"
-                  continue
-                  ;;
-              esac
-
-              echo "    Last commit date: $COMMIT_DATE"
-
-              if [ "$STATUS" = "RECENT" ]; then
-                echo "    → File was updated within the last 2 days"
-                UPDATED=true
-              else
-                echo "    → File has not been updated in the last 2 days"
-              fi
-            done
-
-            if [ "$UPDATED" = "true" ]; then
-              echo "RESULT: SEND A NOTIFICATION"
-            else
-              echo "RESULT: REPOSITORY UNCHANGED"
-            fi
-          done
+        run: python3 .github/scripts/check_file_updates.py
