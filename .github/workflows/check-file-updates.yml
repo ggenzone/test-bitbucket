@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   check-updates:
@@ -15,7 +16,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check each Bitbucket repository for recent file updates
+        id: check
         env:
           BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
           BITBUCKET_ACCOUNT: ${{ secrets.BITBUCKET_ACCOUNT }}
-        run: python3 .github/scripts/check_file_updates.py
+        run: |
+          OUTPUT=$(python3 .github/scripts/check_file_updates.py)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "RESULT: SEND A NOTIFICATION"; then
+            echo "notify=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify via GitHub Issue
+        if: steps.check.outputs.notify == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "📢 Bitbucket file update detected" \
+            --body "Hey @ggenzone — one or more monitored Bitbucket files were updated in the last 2 days. Please review." \
+            --repo ${{ github.repository }}
