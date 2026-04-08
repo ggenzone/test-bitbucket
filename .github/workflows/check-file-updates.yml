@@ -17,4 +17,5 @@ jobs:
       - name: Check each Bitbucket repository for recent file updates
         env:
           BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
+          BITBUCKET_ACCOUNT: ${{ secrets.BITBUCKET_ACCOUNT }}
         run: python3 .github/scripts/check_file_updates.py
