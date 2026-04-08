@@ -1,19 +1,13 @@
 repositories:
-  - name: my-workspace/repo-alpha
+  - name: ggenzone/test-alfta
     branch: main
     files:
       - src/app.py
       - README.md
 
-  - name: my-workspace/repo-beta
-    branch: develop
+  - name: ggenzone/test-beta
+    branch: main
     files:
       - config/settings.json
       - docs/CHANGELOG.md
 
-  - name: my-workspace/repo-gamma
-    branch: release/1.0
-    files:
-      - deploy/Dockerfile
-      - deploy/docker-compose.yml
-      - README.md
