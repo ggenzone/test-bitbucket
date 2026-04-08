@@ -1,9 +1,8 @@
-import json, os, sys, urllib.parse, urllib.request
+import base64, json, os, sys, urllib.parse, urllib.request
 from datetime import datetime, timezone, timedelta
 import yaml
 
-
-def check_file(workspace, repo_slug, branch, file_path, token):
+def check_file(workspace, repo_slug, branch, file_path, credentials):
     encoded_path = urllib.parse.quote(file_path, safe="")
     url = (
         f"https://api.bitbucket.org/2.0/repositories/"
@@ -11,7 +10,8 @@ def check_file(workspace, repo_slug, branch, file_path, token):
         f"?path={encoded_path}&include={urllib.parse.quote(branch, safe='')}&pagelen=1"
     )
 
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    encoded = base64.b64encode(credentials.encode()).decode()
+    req = urllib.request.Request(url, headers={"Authorization": f"Basic {encoded}"})
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read())
@@ -35,9 +35,11 @@ def check_file(workspace, repo_slug, branch, file_path, token):
     status = "RECENT" if commit_dt >= cutoff_dt else "OLD"
     return date_str, status
 
-
 def main():
+    account = os.environ["BITBUCKET_ACCOUNT"]
     token = os.environ["BITBUCKET_TOKEN"]
+    credentials = f"{account}:{token}"
+
     settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "settings.yml")
 
     try:
@@ -67,7 +69,7 @@ def main():
         for file_path in files:
             print(f"  Checking file: {file_path}")
 
-            commit_date, status = check_file(workspace, repo_slug, branch, file_path, token)
+            commit_date, status = check_file(workspace, repo_slug, branch, file_path, credentials)
 
             if commit_date == "NO_COMMITS":
                 print(f"    No commits found for {file_path} on branch {branch}")
