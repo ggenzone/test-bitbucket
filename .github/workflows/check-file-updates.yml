@@ -11,17 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install yq
-        env:
-          YQ_VERSION: "v4.44.3"
-        run: |
-          sudo wget -qO /usr/local/bin/yq \
-            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
-          wget -qO /tmp/yq_checksums.txt \
-            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/checksums"
-          EXPECTED=$(grep "yq_linux_amd64$" /tmp/yq_checksums.txt | awk '{print $1}')
-          echo "${EXPECTED}  /usr/local/bin/yq" | sha256sum -c -
-          sudo chmod +x /usr/local/bin/yq
+      - uses: mikefarah/yq@v4
 
       - name: Checkout this repository to read settings.yml
         uses: actions/checkout@v4
