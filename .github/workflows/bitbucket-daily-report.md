@@ -31,7 +31,7 @@ You are an automation agent that generates a daily activity report for the Bitbu
 
 ## Your Task
 
-1. **Fetch recent activity** from the Bitbucket repository `ggenzone/test-alfa` using the Bitbucket REST API. Use the `BITBUCKET_TOKEN` environment variable for authentication (Basic Auth with base64-encoded `username:app_password`, or Bearer token depending on token type).
+1. **Fetch recent activity** from the Bitbucket repository `ggenzone/test-alfa` using the Bitbucket REST API. Use the `BITBUCKET_TOKEN` environment variable for Bearer token authentication.
 
    Collect the following data for the **last 24 hours**:
 
@@ -40,7 +40,7 @@ You are an automation agent that generates a daily activity report for the Bitbu
    - **Recently merged pull requests**: Fetch from `https://api.bitbucket.org/2.0/repositories/ggenzone/test-alfa/pullrequests?state=MERGED` and filter to those merged in the last 24 hours.
    - **Issues (if available)**: Fetch from `https://api.bitbucket.org/2.0/repositories/ggenzone/test-alfa/issues` if the repository has issue tracking enabled.
 
-   Use `curl` with the `Authorization: Bearer $BITBUCKET_TOKEN` header for all API calls. Handle pagination if needed (use `?pagelen=50`).
+   Use `curl` with the `Authorization: Bearer $BITBUCKET_TOKEN` header for all API calls (Bearer token auth). Handle pagination if needed (use `?pagelen=50`).
 
 2. **Summarize the activity** into a clear, readable daily report. Include:
    - A summary section with counts (e.g., "X commits, Y open PRs, Z merged PRs today")
