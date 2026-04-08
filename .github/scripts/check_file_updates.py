@@ -38,17 +38,25 @@ def check_file(workspace, repo_slug, branch, file_path, token):
 
 def main():
     token = os.environ["BITBUCKET_TOKEN"]
-    settings_path = os.path.join(os.path.dirname(__file__), "..", "..", "settings.yml")
+    settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "settings.yml")
 
-    with open(settings_path) as f:
-        settings = yaml.safe_load(f)
+    try:
+        with open(settings_path) as f:
+            settings = yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"ERROR: settings.yml not found at {settings_path}", file=sys.stderr)
+        sys.exit(1)
 
     for repo in settings.get("repositories", []):
         repo_name = repo["name"]
         branch = repo["branch"]
         files = repo.get("files", [])
 
-        workspace, repo_slug = repo_name.split("/", 1)
+        try:
+            workspace, repo_slug = repo_name.split("/", 1)
+        except ValueError:
+            print(f"ERROR: Invalid repository name '{repo_name}'. Expected format: 'workspace/repo-slug'", file=sys.stderr)
+            continue
 
         print("──────────────────────────────────────────")
         print(f"Repository : {repo_name}")
